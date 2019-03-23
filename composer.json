@@ -1,0 +1,12 @@
+ {
+    "name": "toramanlis/laravel-module-structure",
+    "description": "A simple module structure implementation for Laravel (probably aslo Lumen)",
+    "require": {
+        "php": "^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\": "src",
+        }
+    }
+}
