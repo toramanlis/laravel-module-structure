@@ -35,7 +35,6 @@ Add it to the config file `config/app.php`:
 
     'providers' => [
         ...
-        Modules\ModuleServiceProvider::class,
         App\Modules\CoolModule\Providers\Loader::class,
     ],
 
