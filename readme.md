@@ -1,24 +1,17 @@
 Laravel Module Structure
 ========================
- 
+
 This package helps you distribute your application logic into modules on Laravel framework.
- 
- 
+
+
 Installation
 -----------
 
 You guessed it:
- 
+
     composer require toramanlis/laravel-module-structure
 
-Then you need to add the service provider to `config/app.php`:
-
-    'providers' => [
-        ...
-        Modules\ModuleServiceProvider::class,
-    ],
-
-Then, you can simply start coding in modules by creating the directory `app/Modules`
+That's it, you can simply start coding in modules by creating the directory `app/Modules`
 
 
 Creating a module
@@ -29,13 +22,13 @@ Each folder under the directory `app/Modules` will be the name of your module. Y
 Any Service provider under `app/Modules/<your-module>/`, at any level will do. For instance `app/Modules/CoolModule/Providers/Loader.php`:
 
     <?php
-    
+
     namspace App\Modules\Providers;
-    
+
     use Modules\ModuleServiceProvider;
-    
+
     class Loader extends ModuleServiceProvider{
-        
+
     }
 
 Add it to the config file `config/app.php`:
@@ -67,8 +60,8 @@ You can define your routes just like you usually do in Laravel.
 
     <?php
 
-    Route::middleware(['web',], function() {
-        Route::get('/', 'MyController@coolmethod')->name('whataroute');
+    Route::middleware(['web',])->group(function() {
+     Route::get('test', 'Test@test')->name('whataroute');
     });
 
 Note that you will have to specify that the route uses the middleware `web`. The web routes file in laravel `app/routes/web.php` is already loaded under the `web` middleware, this one's not.
@@ -81,7 +74,7 @@ Views
 
     ...
     return view('<module-name-in-lowercase>::wonderful-view',['data'=>$data]);
-    
+
 Localization
 ------------
 
@@ -93,7 +86,7 @@ Events
 For module events, subscribiers are utilized. The file `app/Modules/<your-module>/module/events.php` includes an array of event [subsciber classes](https://laravel.com/docs/master/events#event-subscribers):
 
     <?php
-    
+
     return [
         App\Modules\CoolModule\Subscribiers\SomthingHappens::class,
     ];
@@ -110,12 +103,12 @@ Commands
 Unfortunately the path `app/Modules/<your-module>/Console/Commands` will NOT work as expected. In order to get it to work, you will need to load the path in `app/Console/Kernel.php` like so:
 
     ...
-    
+
     protected function commands()
     {
         ...
-        
+
         $this->load(app_path('Modules').'/<your-module>/Console/Commands');
-        
+
         ...
     }
