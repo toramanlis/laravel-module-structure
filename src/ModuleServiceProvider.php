@@ -5,6 +5,7 @@ namespace Modules;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 
 class ModuleServiceProvider extends ServiceProvider
 {
@@ -26,7 +27,7 @@ class ModuleServiceProvider extends ServiceProvider
 	protected function loadRoutes($modulePath) {
 		$routesFile = $modulePath->getRealPath() . '/module/routes.php';
 		if (file_exists($routesFile)) {
-			Route::name(strtolower($modulePath->getFilename()) . '::')
+			Route::name(Str::kebab($modulePath->getFilename()) . '::')
 				->namespace('App\Modules\\' . $modulePath->getFilename() . '\Http\Controllers')
 				->group($routesFile);
 		}
@@ -34,11 +35,11 @@ class ModuleServiceProvider extends ServiceProvider
 
 	public function loadConfig($modulePath){
 		$configDir= $modulePath->getRealPath().'/module/config';
-		$key= 'modules.'.strtolower($modulePath->getFilename());
+		$key= 'modules.'.Str::kebab($modulePath->getFilename());
 		config([$key=>['name'=> $modulePath->getFilename()]]);
 		if(is_dir($configDir)){
 			foreach(new \FilesystemIterator($configDir, \FilesystemIterator::SKIP_DOTS) as $configFile){
-				$configFileName=strtolower($configFile->getBasename('.php'));
+				$configFileName=Str::kebab($configFile->getBasename('.php'));
 				if($configFileName=='module'){
 					$this->mergeConfigFrom($configFile->getPathname(), $key);
 				}else{
@@ -72,8 +73,8 @@ class ModuleServiceProvider extends ServiceProvider
 		$this->loadConfig($pathIterator);
 		$this->loadEvents($pathIterator);
 		$this->loadRoutes($pathIterator);
-		$this->loadViewsFrom($pathIterator->getRealPath().'/module/resources/views', strtolower($pathIterator->getFilename()));
-		$this->loadTranslationsFrom($pathIterator->getRealPath().'/module/resources/lang', strtolower($pathIterator->getFilename()));
+		$this->loadViewsFrom($pathIterator->getRealPath().'/module/resources/views', Str::kebab($pathIterator->getFilename()));
+		$this->loadTranslationsFrom($pathIterator->getRealPath().'/module/resources/lang', Str::kebab($pathIterator->getFilename()));
 		$this->loadMigrationsFrom($pathIterator->getRealPath().'/module/database/migrations');
 	}
 }
