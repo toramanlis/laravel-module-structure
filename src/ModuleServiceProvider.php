@@ -24,7 +24,7 @@ class ModuleServiceProvider extends ServiceProvider {
 
 	protected function loadRoutesToLumen($modulePath, $routesFile) {
 		app(\Laravel\Lumen\Routing\Router::class)->group([
-			'namsepace' => '\App\Modules\\' . $modulePath->getFilename() . '\Http\Controllers',
+			'namespace' => '\App\Modules\\' . $modulePath->getFilename() . '\Http\Controllers',
 			'as' => Str::kebab($modulePath->getFilename()),
 			], function()use ($routesFile) {
 			$router = app(\Laravel\Lumen\Routing\Router::class);
