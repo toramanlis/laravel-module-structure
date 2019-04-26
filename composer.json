@@ -1,6 +1,6 @@
 {
 	"name": "toramanlis/laravel-module-structure",
-	"description": "A simple module structure implementation for Laravel (probably aslo Lumen)",
+	"description": "A simple module structure implementation for Laravel and Lumen",
 	"license": "Apache-2.0",
 	"require": {
 		"php": "^7.0"
