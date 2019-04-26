@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules;
+namespace App\Providers;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
@@ -84,8 +84,20 @@ class ModuleServiceProvider extends ServiceProvider {
 		}
 	}
 
+	protected function loadCommands($modulePath) {
+		$commands = [];
+		$commandsDir = $modulePath->getRealPath() . '/Console/Commands';
+		$commandsPath = is_dir($commandsDir) ? new \FilesystemIterator($commandsDir, \FilesystemIterator::SKIP_DOTS) : [];
+		foreach ($commandsPath as $commandFile) {
+			$commands[] = '\App\Modules\\' . $modulePath->getFilename() . '\Console\Commands\\' . $commandFile->getBaseName('.php');
+		}
+
+		$this->commands($commands);
+	}
+
 	protected function load($path) {
 		$pathIterator = new \SplFileInfo(realpath($path));
+		$this->loadCommands($pathIterator);
 		$this->loadConfig($pathIterator);
 		$this->loadEvents($pathIterator);
 		$this->loadRoutes($pathIterator);
