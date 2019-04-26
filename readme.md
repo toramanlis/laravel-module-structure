@@ -1,7 +1,7 @@
 Laravel Module Structure
 ========================
 
-This package helps you distribute your application logic into modules on Laravel framework.
+This package helps you distribute your application logic into modules on Laravel and Lumen.
 
 
 Installation
@@ -17,7 +17,7 @@ That's it, you can simply start coding in modules by creating the directory `app
 Creating a module
 -----------------
 
-Each folder under the directory `app/Modules` will be the name of your module. You are gonna need a service provider to register you module for the app to load it.
+Each folder under the directory `app/Modules` will be the name of your modules. You are going to need a service provider to register your module for the app to load it.
 
 Any Service provider under `app/Modules/<your-module>/`, at any level will do. For instance `app/Modules/CoolModule/Providers/Loader.php`:
 
@@ -31,7 +31,7 @@ Any Service provider under `app/Modules/<your-module>/`, at any level will do. F
 
     }
 
-Add it to the config file `config/app.php`:
+Add it to the configuration file `config/app.php`:
 
     'providers' => [
         ...
@@ -53,9 +53,9 @@ Each php file under the directory `app/Modules/<your-module>/modules/config` wil
 Routes
 -------
 
-The file `app/Modules/<your-module>/module/routes.php` contains the route definitions that belong to the module. Thay will have the prefix `<module-name-in-kebab-case>::` and the namespace `App\Modules\Http\Controllers`.
+The file `app/Modules/<your-module>/module/routes.php` contains the route definitions that belong to the module. Thay will have the namespace `App\Modules\Http\Controllers` and the prefix `<module-name-in-kebab-case>::` **for Laravel** and `<module-name-in-kebab-case>.` **for Lumen**.
 
-You can define your routes just like you usually do in Laravel.
+You can define your routes just like you usually do in Laravel (Or Lumen respectively).
 
     <?php
 
@@ -77,7 +77,7 @@ Views
 Localization
 ------------
 
-Like the views the dedicated path is under the `resource` folder, `app/Modules/<your-module>/module/resources/lang` and everything defined under it has the namespace  `<module-name-in-kebab-case>`. Will be called like `__('<module-name-in-kebab-case>::something.something-else')`
+Like the views, the dedicated path is under the `module/resource` folder, `app/Modules/<your-module>/module/resources/lang` and everything defined under it has the namespace  `<module-name-in-kebab-case>`. They will be called like `__('<module-name-in-kebab-case>::something.something-else')`
 
 Events
 ------
@@ -94,20 +94,9 @@ For module events, subscribiers are utilized. The file `app/Modules/<your-module
 Migrations
 ----------
 
-Migrations will under `app/Modules/<your-module>/module/database/migrations` will be loaded as expected. Unfortunately ht artisan command `make:migration` will not create any under said path because, you know, it's not aware of us.
+Migrations under `app/Modules/<your-module>/module/database/migrations` will be loaded as expected. Unfortunately the artisan command `make:migration` will not create any under said path because, you know, it's not aware of us.
 
 Commands
 --------
 
-Unfortunately the path `app/Modules/<your-module>/Console/Commands` will NOT work as expected. In order to get it to work, you will need to load the path in `app/Console/Kernel.php` like so:
-
-    ...
-
-    protected function commands()
-    {
-        ...
-
-        $this->load(app_path('Modules').'/<your-module>/Console/Commands');
-
-        ...
-    }
+The path `app/Modules/<your-module>/Console/Commands` will work as expected.
