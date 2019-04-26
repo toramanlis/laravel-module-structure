@@ -50,6 +50,16 @@ Configuration
 
 Each php file under the directory `app/Modules/<your-module>/modules/config` will work as a configuration file as expected. Only a special file name `module.php` has an exception. Any configuration in `app/Modules/<your-module>/modules/config/module.php` will have the prefix `modules.<module-name-in-kebab-case>.`.
 
+Dependencies
+------------
+
+The modules that are depending on other can have a file `app/Modules/<your-module>/modules/dependencies.php` containing an array of the class names of service providers that load the modules that are being depended on.
+
+    return [
+        'App\Modules\<some-module>\Providers\Loader',
+        'App\Modules\<some-other-module>\Providers\Loader',
+    ];
+
 Routes
 -------
 

@@ -6,10 +6,16 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Modules\DependencyException;
 
 class ModuleServiceProvider extends ServiceProvider {
 
 	protected static $modulesPath = null;
+	public static $registered = [];
+
+	public function register() {
+		static::$registered[] = static::class;
+	}
 
 	/**
 	 * Define your route model bindings, pattern filters, etc.
@@ -18,7 +24,8 @@ class ModuleServiceProvider extends ServiceProvider {
 	 */
 	public function boot() {
 		$staticFileName = (new \ReflectionClass(static::class))->getFileName();
-		$modulePath = substr($staticFileName, 0, strpos($staticFileName, '/', strlen(base_path('app/Modules')) + 1));
+		$modulePathName = substr($staticFileName, 0, strpos($staticFileName, '/', strlen(base_path('app/Modules')) + 1));
+		$modulePath = new \SplFileInfo(realpath($modulePathName));
 		$this->load($modulePath);
 	}
 
@@ -95,15 +102,30 @@ class ModuleServiceProvider extends ServiceProvider {
 		$this->commands($commands);
 	}
 
-	protected function load($path) {
-		$pathIterator = new \SplFileInfo(realpath($path));
-		$this->loadCommands($pathIterator);
-		$this->loadConfig($pathIterator);
-		$this->loadEvents($pathIterator);
-		$this->loadRoutes($pathIterator);
-		$this->loadViewsFrom($pathIterator->getRealPath() . '/module/resources/views', Str::kebab($pathIterator->getFilename()));
-		$this->loadTranslationsFrom($pathIterator->getRealPath() . '/module/resources/lang', Str::kebab($pathIterator->getFilename()));
-		$this->loadMigrationsFrom($pathIterator->getRealPath() . '/module/database/migrations');
+	protected function checkDependencies($modulePath) {
+		$dependencyPath = $modulePath->getRealPath() . '/module/dependencies.php';
+		$dependencies = file_exists($dependencyPath) ? include($dependencyPath) : [];
+		$notMet = [];
+		foreach ($dependencies as $dependency) {
+			if (!in_array($dependency, static::$registered)) {
+				$matches = [];
+				preg_match('/Modules\\\(.*?)\\\/', $dependency, $matches);
+				$notMet[] = $matches[1];
+			}
+		}
+		if (count($notMet)) {
+			throw new DependencyException($modulePath->getFilename(), $notMet);
+		}
 	}
 
+	protected function load($modulePath) {
+		$this->checkDependencies($modulePath);
+		$this->loadCommands($modulePath);
+		$this->loadConfig($modulePath);
+		$this->loadEvents($modulePath);
+		$this->loadRoutes($modulePath);
+		$this->loadViewsFrom($modulePath->getRealPath() . '/module/resources/views', Str::kebab($modulePath->getFilename()));
+		$this->loadTranslationsFrom($modulePath->getRealPath() . '/module/resources/lang', Str::kebab($modulePath->getFilename()));
+		$this->loadMigrationsFrom($modulePath->getRealPath() . '/module/database/migrations');
+	}
 }
