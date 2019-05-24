@@ -66,12 +66,9 @@ class ModuleServiceProvider extends ServiceProvider {
 				if ($configFileName == 'module') {
 					$this->mergeConfigFrom($configFile->getPathname(), $key);
 				} else {
+					$config = $this->app['config']->get($configFileName, []);
 					$moduleConfig = include($configFile->getPathname());
-					foreach ($moduleConfig as $globalKey => $value) {
-						$already = config($configFileName . '.' . $globalKey);
-						$toMerge = $already ? (is_array($already) ? $already : [$already]) : [];
-						config([$configFileName . '.' . $globalKey => array_merge($toMerge, is_array($value) ? $value : [$value])]);
-					}
+					$this->app['config']->set($configFileName, array_merge($config, $moduleConfig));
 				}
 			}
 		}
