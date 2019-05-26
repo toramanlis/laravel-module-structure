@@ -84,7 +84,7 @@ class ModuleServiceProvider extends ServiceProvider {
 
 	protected function loadSubscribers($subscriberInfo) {
 		foreach ($subscriberInfo as $subscriber) {
-			Event::subscribe($subscriber);
+			app('events')->subscribe($subscriber);
 		}
 	}
 
