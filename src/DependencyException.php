@@ -15,6 +15,6 @@ namespace Modules;
  */
 class DependencyException extends \Exception{
 	public function __construct($moduleName, $dependenciesNotMet) {
-		parent::__construct('Module ' . $moduleName . ' depends on module'.(count($dependenciesNotMet>1?'s':'')).': ' . implode(',', $dependenciesNotMet));
+		parent::__construct('Module ' . $moduleName . ' depends on module'.(count($dependenciesNotMet)>1?'s':'').': ' . implode(',', $dependenciesNotMet));
 	}
 }
