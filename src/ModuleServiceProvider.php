@@ -24,7 +24,7 @@ class ModuleServiceProvider extends ServiceProvider {
 	 */
 	public function boot() {
 		$staticFileName = (new \ReflectionClass(static::class))->getFileName();
-		$modulePathName = substr($staticFileName, 0, strpos($staticFileName, '/', strlen(base_path('app/Modules')) + 1));
+		$modulePathName = substr($staticFileName, 0, strpos($staticFileName, DIRECTORY_SEPARATOR, strlen(base_path('app' . DIRECTORY_SEPARATOR . 'Modules')) + 1));
 		$modulePath = new \SplFileInfo(realpath($modulePathName));
 		$this->load($modulePath);
 	}
