@@ -12,7 +12,7 @@ class ModuleServiceProvider extends ServiceProvider
 {
 	protected static $modulesPath 	= null;
 	public static $registered     	= [];
-	protected $modulePath     		= [];
+	protected $modulePath     	= [];
 
 	public function register()
 	{
@@ -28,7 +28,7 @@ class ModuleServiceProvider extends ServiceProvider
 	{
 		$staticFileName = (new \ReflectionClass(static::class))->getFileName();
 		$modulePathName = substr($staticFileName, 0, strpos($staticFileName, DIRECTORY_SEPARATOR, strlen(base_path('app' . DIRECTORY_SEPARATOR . 'Modules')) + 1));
-		$this->modulePath     = new \SplFileInfo(realpath($modulePathName));
+		$this->modulePath = new \SplFileInfo(realpath($modulePathName));
 		$this->load();
 	}
 
@@ -128,7 +128,7 @@ class ModuleServiceProvider extends ServiceProvider
 
 	protected function load() : void
 	{
-		$realPath 		= $this->modulePath->getRealPath();
+		$realPath 	= $this->modulePath->getRealPath();
 		$kebabFilename 	= Str::kebab($this->modulePath->getFilename());
 
 		$this->checkDependencies();
