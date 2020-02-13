@@ -123,6 +123,9 @@ class ModuleServiceProvider extends ServiceProvider {
 		$this->loadRoutes($modulePath);
 		$this->loadViewsFrom($modulePath->getRealPath() . '/module/resources/views', Str::kebab($modulePath->getFilename()));
 		$this->loadTranslationsFrom($modulePath->getRealPath() . '/module/resources/lang', Str::kebab($modulePath->getFilename()));
-		$this->loadMigrationsFrom($modulePath->getRealPath() . '/module/database/migrations');
+		
+		if (app()->runningInConsole()) {
+			$this->loadMigrationsFrom($modulePath->getRealPath() . '/module/database/migrations');
+		}
 	}
 }
