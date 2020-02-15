@@ -18,8 +18,6 @@ class ModuleServiceProvider extends ServiceProvider
 	protected $isActive            = null;
 	protected $checkActive         = true;
 
-	const noModule = 'nomodule';
-
 	public function register()
 	{
 		static::$registered[] = static::class;
@@ -268,7 +266,7 @@ class ModuleServiceProvider extends ServiceProvider
 				self::$activeModule = $targetModule;
 			} elseif (!$targetModule) {
 				$this->isActive     = false;
-				self::$activeModule = self::noModule;
+				self::$activeModule = $moduleIndicator;
 			} else {
 				$this->isActive = false;
 			}
