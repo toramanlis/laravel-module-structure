@@ -18,6 +18,8 @@ class ModuleServiceProvider extends ServiceProvider
 	protected $isActive            = null;
 	protected $checkActive         = true;
 
+	const noModule = 'nomodule';
+
 	public function register()
 	{
 		static::$registered[] = static::class;
@@ -30,9 +32,14 @@ class ModuleServiceProvider extends ServiceProvider
 		$this->modulePath = new \SplFileInfo(realpath($modulePathName));
 		$this->load();
 
-		if ($this->checkActive && !self::$activeModule) {
+		if ($this->checkActive) {
 			// check if checkActive is true and no active module is found to prevent unnecessary work
-			$this->determineisActive();
+			if (!self::$activeModule) {
+				$this->determineisActive();
+			} else {
+				// a module is already found, set this module's isActive to false bool
+				$this->isActive = false;
+			}
 		}
 
 		if ($this->isActive) {
@@ -259,6 +266,9 @@ class ModuleServiceProvider extends ServiceProvider
 			if (static::class === $moduleIndicator || ($targetModule && $this->getModuleFromString(static::class) === $targetModule)) {
 				$this->isActive     = true;
 				self::$activeModule = $targetModule;
+			} elseif (!$targetModule) {
+				$this->isActive     = false;
+				self::$activeModule = self::noModule;
 			} else {
 				$this->isActive = false;
 			}
@@ -267,10 +277,16 @@ class ModuleServiceProvider extends ServiceProvider
 
 	private function getModuleFromString(string $moduleIndicator): string
 	{
-		$search = 'App\\Modules';
+		$search = app()->getNamespace() . 'Modules';
 
-		// looks for App\Modules and extracts the next word before \
-		if (($pos = stripos($moduleIndicator, $search)) !== false) {
+		// looks for app\Modules or namespace\Modules
+		if (($pos = stripos($moduleIndicator, $search)) === false) {
+			$search = 'app\\Modules';
+			$pos    = stripos($moduleIndicator, $search);
+		}
+
+		// and extracts the next word before \
+		if (false !== $pos) {
 			$trimmed    = ltrim(substr($moduleIndicator, $pos + strlen($search)), '\\');
 			$moduleInfo = explode('\\', $trimmed, 2);
 			$moduleName = $moduleInfo[0] ?? '';
