@@ -47,32 +47,49 @@ class ModuleServiceProvider extends ServiceProvider
 
 	public function activeBoot() {}
 
-	protected function loadRoutesToLumen(string $routesFile): void
+	protected function loadRoutesToLumen(string $routesDir): void
 	{
-		app(\Laravel\Lumen\Routing\Router::class)->group([
-			'namespace' => '\App\Modules\\' . $this->modulePath->getFilename() . '\Http\Controllers',
-			'as'        => Str::kebab($this->modulePath->getFilename())
-		], function () use ($routesFile) {
-			$router = app(\Laravel\Lumen\Routing\Router::class);
-			include ($routesFile);
-		});
+		$routeFile     = "{$routesDir}/routes.php";
+		$rootNamespace = app()->getNamespace();
+
+		if (file_exists($routeFile)) {
+			app(\Laravel\Lumen\Routing\Router::class)->group([
+				'namespace' => '\\' . $rootNamespace . 'Modules\\' . $this->modulePath->getFilename() . '\Http\Controllers',
+				'as'        => Str::kebab($this->modulePath->getFilename())
+			], function () use ($routesDir) {
+				$router = app(\Laravel\Lumen\Routing\Router::class);
+				include ("{$routesDir}/routes.php");
+			});
+		}
 	}
 
-	protected function loadRoutesToLaravel(string $routesFile): void
+	protected function loadRoutesToLaravel(string $routesDir): void
 	{
-		Route::name(Str::kebab($this->modulePath->getFilename()) . '::')
-			->namespace('App\Modules\\' . $this->modulePath->getFilename() . '\Http\Controllers')->middleware('bindings')
-			->group($routesFile);
+		$routeFiles = [
+			['path' => "{$routesDir}/web.php", 'middleware' => 'web'],
+			['path' => "{$routesDir}/api.php", 'middleware' => 'api'],
+			['path' => "{$routesDir}/routes.php", 'middleware' => 'bindings']
+		];
+		$rootNamespace = app()->getNamespace();
+
+		foreach ($routeFiles as $_ => $routeFile) {
+			if (file_exists($routeFile['path'])) {
+				Route::name(Str::kebab($this->modulePath->getFilename()) . '::')
+					->namespace($rootNamespace . 'Modules\\' . $this->modulePath->getFilename() . '\Http\Controllers')->middleware($routeFile['middleware'])
+					->group($routeFile['path']);
+			}
+		}
+
 	}
 
 	protected function loadRoutes(): void
 	{
-		$routesFile = $this->modulePath->getRealPath() . '/module/routes.php';
-		if (file_exists($routesFile)) {
+		$routesDir = $this->modulePath->getRealPath() . '/module';
+		if (file_exists($routesDir)) {
 			if (app() instanceof \Illuminate\Foundation\Application) {
-				$this->loadRoutesToLaravel($routesFile);
+				$this->loadRoutesToLaravel($routesDir);
 			} else {
-				$this->loadRoutesToLumen($routesFile);
+				$this->loadRoutesToLumen($routesDir);
 			}
 		}
 	}
@@ -119,11 +136,13 @@ class ModuleServiceProvider extends ServiceProvider
 
 	protected function loadCommands(): void
 	{
-		$commands     = [];
-		$commandsDir  = $this->modulePath->getRealPath() . '/Console/Commands';
-		$commandsPath = is_dir($commandsDir) ? new \FilesystemIterator($commandsDir, \FilesystemIterator::SKIP_DOTS) : [];
+		$commands      = [];
+		$commandsDir   = $this->modulePath->getRealPath() . '/Console/Commands';
+		$commandsPath  = is_dir($commandsDir) ? new \FilesystemIterator($commandsDir, \FilesystemIterator::SKIP_DOTS) : [];
+		$rootNamespace = app()->getNamespace();
+
 		foreach ($commandsPath as $commandFile) {
-			$commands[] = '\App\Modules\\' . $this->modulePath->getFilename() . '\Console\Commands\\' . $commandFile->getBaseName('.php');
+			$commands[] = '\\' . $rootNamespace . 'Modules\\' . $this->modulePath->getFilename() . '\Console\Commands\\' . $commandFile->getBaseName('.php');
 		}
 
 		$this->commands($commands);
