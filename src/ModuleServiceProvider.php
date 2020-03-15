@@ -67,16 +67,27 @@ class ModuleServiceProvider extends ServiceProvider
 	{
 		$routeFiles = [
 			['path' => "{$routesDir}/web.php", 'middleware' => 'web'],
+			['path' => "{$routesDir}/_web.php", 'middleware' => 'web'],
 			['path' => "{$routesDir}/api.php", 'middleware' => 'api'],
-			['path' => "{$routesDir}/routes.php", 'middleware' => 'bindings']
+			['path' => "{$routesDir}/_api.php", 'middleware' => 'api'],
+			['path' => "{$routesDir}/routes.php", 'middleware' => 'bindings'],
+			['path' => "{$routesDir}/_routes.php", 'middleware' => 'bindings']
 		];
 		$rootNamespace = app()->getNamespace();
 
 		foreach ($routeFiles as $_ => $routeFile) {
 			if (file_exists($routeFile['path'])) {
-				Route::name(Str::kebab($this->modulePath->getFilename()) . '::')
-					->namespace($rootNamespace . 'Modules\\' . $this->modulePath->getFilename() . '\Http\Controllers')->middleware($routeFile['middleware'])
-					->group($routeFile['path']);
+
+				$routed = Route::namespace($rootNamespace . 'Modules\\' . $this->modulePath->getFilename() . '\Http\Controllers')
+					->middleware($routeFile['middleware']);
+
+				$fileName = explode('/', $routeFile['path']);
+				$fileName = end($fileName);
+				if (strpos($fileName, '_') === false) {
+					$routed->name((Str::kebab($this->modulePath->getFilename()) . '::'));
+				}
+
+				$routed->group($routeFile['path']);
 			}
 		}
 
